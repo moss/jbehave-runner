@@ -5,15 +5,18 @@ import org.jbehave.scenario.definition.*;
 import org.jbehave.scenario.steps.*;
 import org.junit.runner.*;
 
+import java.util.List;
+
 public class JUnitDescriptionGenerator {
 
-    public Description createDescriptionFrom(ScenarioDefinition scenario, Steps... candidateSteps) {
+    public Description createDescriptionFrom(ScenarioDefinition scenario,
+                                             List<CandidateSteps> allCandidateSteps) {
         Class clazz = ClassUtils.getOrCreateClass(scenario.getTitle());
         Description scenarioDescription = Description.createTestDescription(clazz, scenario.getTitle());
 
         DescriptionTextUniquefier uniquefier = new DescriptionTextUniquefier();
         for (String stringStep : scenario.getSteps()) {
-            for (Steps candidates : candidateSteps) {
+            for (CandidateSteps candidates : allCandidateSteps) {
                 for (CandidateStep candidate : candidates.getSteps()) {
                     if (candidate.matches(stringStep)) {
                         String uniqueString = uniquefier.getUniqueDescription(getJunitSafeString(stringStep));
@@ -26,11 +29,11 @@ public class JUnitDescriptionGenerator {
     }
 
     public Description createDescriptionFrom(StoryDefinition story,
-                                             Steps candidateSteps, Class<? extends JUnitScenario> testClass) {
+                                             List<CandidateSteps> candidateSteps,
+                                             Class<? extends JUnitScenario> testClass) {
         Description storyDescription = Description.createSuiteDescription(testClass);
         for (ScenarioDefinition definition : story.getScenarios()) {
-            storyDescription.addChild(createDescriptionFrom(definition,
-                    candidateSteps));
+            storyDescription.addChild(createDescriptionFrom(definition, candidateSteps));
         }
         return storyDescription;
     }

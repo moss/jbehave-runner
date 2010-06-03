@@ -2,19 +2,21 @@ package org.jbehave.contrib.finegrained;
 
 import org.jbehave.scenario.*;
 import org.jbehave.scenario.reporters.ScenarioReporter;
-import org.jbehave.scenario.steps.Steps;
+import org.jbehave.scenario.steps.CandidateSteps;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 
 public class ReflectionHelper {
 
     private final Class<?> invokingClass;
     private final Class<? extends JUnitScenario> testClass;
+    private RunnableScenario testInstanceForReference;
 
     public ReflectionHelper(Class<?> invokingClass, Class<? extends JUnitScenario> testClass) {
         this.invokingClass = invokingClass;
         this.testClass = testClass;
-
+        this.testInstanceForReference = createTestInstance();
     }
 
     public <T> T getInstance(Class<T> targetClass) {
@@ -43,29 +45,27 @@ public class ReflectionHelper {
         return getInstance(configurationClass);
     }
 
-    public Steps reflectMeCandidateSteps() {
-        checkForAnnotation(UseSteps.class);
-        Class<? extends Steps> StepsClass = testClass.getAnnotation(
-                UseSteps.class).value();
-        return getInstance(StepsClass);
+    public List<CandidateSteps> reflectMeCandidateSteps() {
+        return testInstanceForReference.getSteps();
     }
 
     public JUnitScenario reflectMeATestInstance(final JUnitScenarioReporter reporter) {
+        final JUnitScenario newTestInstance = createTestInstance();
+        Configuration configuration = newTestInstance.getConfiguration();
+        newTestInstance.useConfiguration(new DelegatingConfiguration(configuration) {
+            @Override public ScenarioReporter forReportingScenarios() {
+                return reporter;
+            }
+        });
+        return newTestInstance;
+    }
+
+    private JUnitScenario createTestInstance() {
         try {
-            final JUnitScenario testInstance = testClass.newInstance();
-            Configuration configuration = testInstance.getConfiguration();
-            testInstance.useConfiguration(new DelegatingConfiguration(configuration) {
-                @Override public ScenarioReporter forReportingScenarios() {
-                    return reporter;
-                }
-            });
-            return testInstance;
+            return testClass.newInstance();
         } catch (Exception e) {
             throw new IllegalArgumentException(testClass.toString()
-                    + "must have constructor with the following args: ("
-                    + ClassLoader.class.toString() + ", "
-                    + ScenarioReporter.class.toString()
-                    + ") in order to use custom runner "
+                    + " must have an empty constructor in order to use custom runner "
                     + this.getClass().toString(), e);
         }
     }

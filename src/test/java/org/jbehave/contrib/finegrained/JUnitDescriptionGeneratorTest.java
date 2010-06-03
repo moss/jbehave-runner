@@ -14,13 +14,14 @@ import java.util.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jbehave.Ensure.ensureThat;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.*;
 
 public class JUnitDescriptionGeneratorTest {
 
     @Mock
     CandidateStep candidateStep;
     @Mock
-    Steps steps;
+    CandidateSteps steps;
     @Mock
     StoryDefinition story;
 
@@ -38,22 +39,34 @@ public class JUnitDescriptionGeneratorTest {
     public void shouldGenerateDescriptionForTopLevelScenario() throws CannotCompileException {
         String scenarioTitle = "MyTitle";
         ScenarioDefinition scenario = new ScenarioDefinition(scenarioTitle, Collections.<String>emptyList());
-        Description description = generator.createDescriptionFrom(scenario, steps);
+        Description description = generator.createDescriptionFrom(scenario, Arrays.asList(steps));
         ensureThat(description, equalTo(Description.createTestDescription(ClassUtils.getOrCreateClass(scenarioTitle), scenarioTitle)));
     }
 
     @Test
     public void shouldGenerateDescriptionForStep() {
         ScenarioDefinition scenario = new ScenarioDefinition("MyTitle", Arrays.asList("Step1"));
-        Description description = generator.createDescriptionFrom(scenario, steps);
+        Description description = generator.createDescriptionFrom(scenario, Arrays.asList(steps));
         ensureThat(description.getChildren().size(), equalTo(1));
         ensureThat(description.getChildren().get(0), equalTo(Description.createTestDescription(steps.getClass(), "Step1 - Scenario: MyTitle")));
     }
 
     @Test
+    public void shouldCheckAllCandidateStepsClassesForSteps() {
+        CandidateSteps moreSteps = mock(CandidateSteps.class, "moreSteps");
+        Mockito.when(moreSteps.getSteps()).thenReturn(new CandidateStep[]{candidateStep});
+
+        ScenarioDefinition scenario = new ScenarioDefinition("MyTitle", Arrays.asList("Step1"));
+        Description description = generator.createDescriptionFrom(scenario, Arrays.asList(steps, moreSteps));
+        ensureThat(description.getChildren().size(), equalTo(2));
+        ensureThat(description.getChildren().get(0), equalTo(Description.createTestDescription(steps.getClass(), "Step1 - Scenario: MyTitle")));
+        ensureThat(description.getChildren().get(1), equalTo(Description.createTestDescription(moreSteps.getClass(), "Step1. - Scenario: MyTitle")));
+    }
+
+    @Test
     public void shouldGenerateDescriptionForStory() {
         Mockito.when(story.getScenarios()).thenReturn(Collections.<ScenarioDefinition>emptyList());
-        Description description = generator.createDescriptionFrom(story, steps, JUnitScenario.class);
+        Description description = generator.createDescriptionFrom(story, Arrays.asList(steps), JUnitScenario.class);
         ensureThat(description, equalTo(Description.createSuiteDescription(JUnitScenario.class)));
     }
 
@@ -61,7 +74,7 @@ public class JUnitDescriptionGeneratorTest {
     public void shouldGenerateDescriptionForScenarioChildOfStory() {
         String scenarioTitle = "MyTitle";
         Mockito.when(story.getScenarios()).thenReturn(Arrays.asList(new ScenarioDefinition(scenarioTitle, Collections.<String>emptyList())));
-        Description description = generator.createDescriptionFrom(story, steps, JUnitScenario.class);
+        Description description = generator.createDescriptionFrom(story, Arrays.asList(steps), JUnitScenario.class);
         ensureThat(description.getChildren().size(), equalTo(1));
         ensureThat(description.getChildren().get(0), equalTo(Description.createTestDescription(ClassUtils.getOrCreateClass(scenarioTitle), scenarioTitle)));
     }
@@ -70,7 +83,7 @@ public class JUnitDescriptionGeneratorTest {
     public void shouldCopeWithSeeminglyDuplicateSteps() throws Exception {
         ScenarioDefinition scenario = new ScenarioDefinition("MyTitle",
                 Arrays.asList("Step1", "Step2", "Step3", "Step2", "Step2"));
-        Description description = generator.createDescriptionFrom(scenario, steps);
+        Description description = generator.createDescriptionFrom(scenario, Arrays.asList(steps));
         ensureThat(description.getChildren().size(), equalTo(5));
         ensureThat(description, allChildrenHaveUniqueDisplayNames());
     }
