@@ -6,7 +6,6 @@ import org.junit.runner.*;
 
 
 @RunWith(JUnitReportingRunner.class)
-@UseConfiguration(ExampleScenario.MyJBehaveConfiguration.class)
 public class ExampleScenario extends JUnitScenario {
 
     public ExampleScenario() {

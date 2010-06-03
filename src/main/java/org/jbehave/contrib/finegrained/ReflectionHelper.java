@@ -4,45 +4,20 @@ import org.jbehave.scenario.*;
 import org.jbehave.scenario.reporters.ScenarioReporter;
 import org.jbehave.scenario.steps.CandidateSteps;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 
 public class ReflectionHelper {
 
-    private final Class<?> invokingClass;
     private final Class<? extends JUnitScenario> testClass;
     private RunnableScenario testInstanceForReference;
 
-    public ReflectionHelper(Class<?> invokingClass, Class<? extends JUnitScenario> testClass) {
-        this.invokingClass = invokingClass;
+    public ReflectionHelper(Class<? extends JUnitScenario> testClass) {
         this.testClass = testClass;
         this.testInstanceForReference = createTestInstance();
     }
 
-    public <T> T getInstance(Class<T> targetClass) {
-        try {
-            return targetClass.newInstance();
-        } catch (Exception e) {
-            throw new IllegalArgumentException(targetClass.toString()
-                    + " must have default constructor to use custom runner "
-                    + invokingClass.toString());
-        }
-    }
-
-    public void checkForAnnotation(Class<? extends Annotation> annotationClass) {
-        Annotation annotation = testClass.getAnnotation(annotationClass);
-        if (annotation == null) {
-            throw new IllegalArgumentException(testClass.toString()
-                    + " must declare annotation " + annotationClass.toString()
-                    + " to use custom runner " + invokingClass.toString());
-        }
-    }
-
     public Configuration reflectMeAConfiguration() {
-        checkForAnnotation(UseConfiguration.class);
-        Class<? extends Configuration> configurationClass = testClass.getAnnotation(
-                UseConfiguration.class).value();
-        return getInstance(configurationClass);
+        return testInstanceForReference.getConfiguration();
     }
 
     public List<CandidateSteps> reflectMeCandidateSteps() {

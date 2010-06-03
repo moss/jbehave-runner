@@ -13,7 +13,7 @@ public class JUnitReportingRunner extends Runner {
     private ReflectionHelper reflectionHelper;
 
     public JUnitReportingRunner(Class<? extends JUnitScenario> testClass) {
-        reflectionHelper = new ReflectionHelper(this.getClass(), testClass);
+        reflectionHelper = new ReflectionHelper(testClass);
         StoryDefinition story = reflectionHelper.reflectMeAConfiguration().forDefiningScenarios().loadScenarioDefinitionsFor(testClass);
         List<CandidateSteps> candidateSteps = reflectionHelper.reflectMeCandidateSteps();
         JUnitDescriptionGenerator descriptionGenerator = new JUnitDescriptionGenerator();
