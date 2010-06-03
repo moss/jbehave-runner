@@ -1,17 +1,14 @@
 package org.jbehave.contrib.finegrained;
 
 import org.jbehave.scenario.JUnitScenario;
-import org.jbehave.scenario.definition.ScenarioDefinition;
-import org.jbehave.scenario.definition.StoryDefinition;
-import org.jbehave.scenario.steps.CandidateStep;
-import org.jbehave.scenario.steps.Steps;
-import org.junit.runner.Description;
+import org.jbehave.scenario.definition.*;
+import org.jbehave.scenario.steps.*;
+import org.junit.runner.*;
 
 public class JUnitDescriptionGenerator {
 
     public Description createDescriptionFrom(ScenarioDefinition scenario, Steps... candidateSteps) {
-        Class clazz = getClass();
-        clazz = ClassUtils.getOrCreateClass(scenario.getTitle());
+        Class clazz = ClassUtils.getOrCreateClass(scenario.getTitle());
         Description scenarioDescription = Description.createTestDescription(clazz, scenario.getTitle());
 
         DescriptionTextUniquefier uniquefier = new DescriptionTextUniquefier();

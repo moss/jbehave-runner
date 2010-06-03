@@ -1,14 +1,11 @@
 package org.jbehave.contrib.finegrained;
 
-import org.jbehave.scenario.definition.Blurb;
+import org.jbehave.scenario.definition.*;
 import org.jbehave.scenario.reporters.ScenarioReporter;
-import org.junit.runner.Description;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunNotifier;
+import org.junit.runner.*;
+import org.junit.runner.notification.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class JUnitScenarioReporter implements ScenarioReporter {
 
@@ -34,16 +31,41 @@ public class JUnitScenarioReporter implements ScenarioReporter {
         }
     }
 
-    public void afterStory() {
+    public void givenScenarios(List<String> givenScenarios) {
+    }
+
+    public void examplesTable(ExamplesTable table) {
+    }
+
+    public void beforeExamples(List<String> steps, ExamplesTable table) {
+    }
+
+    public void examplesTableRow(Map<String, String> tableRow) {
+    }
+
+    public void example(Map<String, String> tableRow) {
+    }
+
+    public void afterExamples() {
+    }
+
+    public void afterStory(boolean embeddedStory) {
         notifier.fireTestFinished(storyDescription);
+    }
+
+    public void afterStory() {
+        afterStory(false);
     }
 
     public void beforeScenario(String title) {
         notifier.fireTestStarted(currentScenario);
     }
 
-
     public void beforeStory(Blurb blurb) {
+        beforeStory(new StoryDefinition(blurb), false);
+    }
+
+    public void beforeStory(StoryDefinition story, boolean embeddedStory) {
         notifier.fireTestStarted(storyDescription);
     }
 
@@ -52,6 +74,9 @@ public class JUnitScenarioReporter implements ScenarioReporter {
         notifier.fireTestStarted(currentStep);
         notifier.fireTestFailure(new Failure(currentStep, e));
         finishedDescriptions.add(currentStep);
+    }
+
+    public void dryRun() {
     }
 
     public void notPerformed(String step) {
@@ -65,6 +90,9 @@ public class JUnitScenarioReporter implements ScenarioReporter {
         notifier.fireTestStarted(currentStep);
         notifier.fireTestFinished(currentStep);
         finishedDescriptions.add(currentStep);
+    }
+
+    public void ignorable(String step) {
     }
 
     private Description getStepDescription(String step) {
