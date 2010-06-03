@@ -1,12 +1,8 @@
 package org.jbehave.contrib.finegrained;
 
-import org.jbehave.scenario.JUnitScenario;
-import org.jbehave.scenario.PropertyBasedConfiguration;
-import org.jbehave.scenario.parser.ClasspathScenarioDefiner;
-import org.jbehave.scenario.parser.PatternScenarioParser;
-import org.jbehave.scenario.parser.UnderscoredCamelCaseResolver;
-import org.jbehave.scenario.reporters.ScenarioReporter;
-import org.junit.runner.RunWith;
+import org.jbehave.scenario.*;
+import org.jbehave.scenario.parser.*;
+import org.junit.runner.*;
 
 
 @RunWith(JUnitReportingRunner.class)
@@ -14,13 +10,8 @@ import org.junit.runner.RunWith;
 @UseConfiguration(ExampleScenario.MyJBehaveConfiguration.class)
 public class ExampleScenario extends JUnitScenario {
 
-    public ExampleScenario(final ScenarioReporter reporter) {
-        super(new MyJBehaveConfiguration() {
-            @Override
-            public ScenarioReporter forReportingScenarios() {
-                return reporter;
-            }
-        }, new ExampleSteps());
+    public ExampleScenario() {
+        super(new MyJBehaveConfiguration(), new ExampleSteps());
     }
 
 

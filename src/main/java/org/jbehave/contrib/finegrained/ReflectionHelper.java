@@ -1,7 +1,6 @@
 package org.jbehave.contrib.finegrained;
 
-import org.jbehave.scenario.Configuration;
-import org.jbehave.scenario.JUnitScenario;
+import org.jbehave.scenario.*;
 import org.jbehave.scenario.reporters.ScenarioReporter;
 import org.jbehave.scenario.steps.Steps;
 
@@ -51,9 +50,16 @@ public class ReflectionHelper {
         return getInstance(StepsClass);
     }
 
-    public JUnitScenario reflectMeATestInstance(JUnitScenarioReporter reporter) {
+    public JUnitScenario reflectMeATestInstance(final JUnitScenarioReporter reporter) {
         try {
-            return testClass.getConstructor(ScenarioReporter.class).newInstance(reporter);
+            final JUnitScenario testInstance = testClass.newInstance();
+            Configuration configuration = testInstance.getConfiguration();
+            testInstance.useConfiguration(new DelegatingConfiguration(configuration) {
+                @Override public ScenarioReporter forReportingScenarios() {
+                    return reporter;
+                }
+            });
+            return testInstance;
         } catch (Exception e) {
             throw new IllegalArgumentException(testClass.toString()
                     + "must have constructor with the following args: ("
